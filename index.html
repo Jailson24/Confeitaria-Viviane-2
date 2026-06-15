@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Gestor de Vendas Samuca</title>
     
-    <!-- PWA Meta Tags -->
     <link rel="manifest" href="manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -73,7 +72,6 @@
 </head>
 <body class="p-4 md:p-8 text-slate-800 pb-48 min-h-[100dvh]">
 
-    <!-- HELPER FUNCTIONS HTML/DOM -->
     <script>
         window.$ = id => document.getElementById(id);
         window.show = id => { const el = window.$(id); if(el) el.classList.remove('hidden-screen'); };
@@ -84,13 +82,11 @@
         };
     </script>
 
-    <!-- LOADER -->
     <div id="app-loader" class="fixed inset-0 bg-brand-900 z-[9999] flex flex-col items-center justify-center transition-opacity duration-500">
         <i class="fas fa-circle-notch fa-spin text-white text-5xl mb-4"></i>
         <h2 class="text-white font-serif font-bold text-xl">Carregando Sistema...</h2>
     </div>
 
-    <!-- TELA DE LOGIN -->
     <div id="screen-login" class="fixed inset-0 bg-brand-900 z-[9000] flex items-center justify-center hidden-screen p-4">
         <div class="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl flex flex-col items-center">
             <div class="w-20 h-20 bg-brand-100 rounded-full flex items-center justify-center text-4xl text-brand-600 mb-4 shadow-inner">
@@ -119,7 +115,6 @@
         </div>
     </div>
 
-    <!-- TELA CAIXA BLOQUEADO -->
     <div id="screen-caixa-fechado" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-[100] flex items-center justify-center hidden-screen p-4">
         <div class="bg-white rounded-3xl p-8 w-full max-w-sm shadow-2xl text-center">
             <i class="fas fa-lock text-5xl text-slate-300 mb-4"></i>
@@ -131,25 +126,21 @@
         </div>
     </div>
 
-    <!-- TOAST NOTIFICATION -->
     <div id="toast-container" class="fixed top-4 left-0 right-0 z-[500] flex justify-center hidden-screen pointer-events-none transition-all">
         <div class="bg-brand-900 text-white px-6 py-3 rounded-full shadow-lg font-medium flex items-center gap-2 text-sm border border-brand-700">
             <i class="fas fa-check-circle text-accent-500"></i> <span id="toast-text">Ação concluída!</span>
         </div>
     </div>
 
-    <!-- FAB INSTALAR APP (PWA) -->
     <button type="button" id="btn-install-app" class="fixed bottom-24 left-4 bg-emerald-600 text-white px-4 py-3 rounded-full shadow-2xl flex items-center justify-center gap-2 z-40 hidden-screen transition-transform active:scale-95 border-2 border-emerald-700">
         <i class="fas fa-download"></i> <span class="text-sm font-bold">Instalar App</span>
     </button>
 
-    <!-- FAB CARRINHO -->
     <button type="button" id="fab-cart" onclick="window.abrirCarrinho()" class="fixed bottom-24 right-4 w-16 h-16 bg-brand-900 text-white rounded-full shadow-2xl flex items-center justify-center text-2xl z-40 hidden-screen transition-transform active:scale-95 border-2 border-brand-700">
         <i class="fas fa-shopping-cart"></i>
         <span id="cart-badge" class="absolute -top-1 -right-1 bg-accent-500 text-white text-[12px] font-black w-6 h-6 rounded-full flex items-center justify-center border-2 border-white shadow-sm">0</span>
     </button>
 
-    <!-- HEADER STATUS CAIXA / USUARIO -->
     <div id="top-bar-user" class="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur border-b border-slate-200 z-30 px-4 py-2 flex justify-between items-center hidden-screen">
         <div class="flex items-center gap-2">
             <div class="w-8 h-8 bg-brand-100 text-brand-700 rounded-full flex items-center justify-center text-sm font-bold shadow-sm"><i class="fas fa-user"></i></div>
@@ -171,8 +162,6 @@
 
     <div class="h-14 w-full pointer-events-none hidden" id="top-bar-spacer"></div>
 
-    <!-- ================== TELAS DA APLICAÇÃO ================== -->
-    <!-- ESTOQUE -->
     <div id="screen-estoque" class="hidden-screen pt-4">
         <div class="max-w-4xl mx-auto h-40 bg-banner-estoque bg-cover bg-center rounded-3xl mb-6 shadow-md relative overflow-hidden">
             <div class="absolute inset-0 bg-gradient-to-t from-brand-900/90 to-brand-900/20 flex flex-col justify-end p-6">
@@ -212,7 +201,6 @@
         </div>
     </div>
 
-    <!-- ECRÃ RECEITAS -->
     <div id="screen-receitas" class="max-w-4xl mx-auto hidden-screen pt-4">
         <div class="h-40 bg-banner-receitas bg-cover bg-center rounded-3xl mb-6 shadow-md relative overflow-hidden">
             <div class="absolute inset-0 bg-gradient-to-t from-brand-900/90 to-brand-900/20 flex flex-col justify-end p-6">
@@ -232,7 +220,6 @@
         </div>
     </div>
 
-    <!-- ECRÃ CLIENTES -->
     <div id="screen-clientes" class="max-w-4xl mx-auto hidden-screen pt-4">
         <div class="h-32 bg-banner-clientes bg-cover bg-center rounded-3xl mb-6 shadow-md relative overflow-hidden">
             <div class="absolute inset-0 bg-gradient-to-t from-brand-900/90 to-brand-900/20 flex items-end justify-between p-6">
@@ -247,7 +234,6 @@
         <div id="msg-vazia-clientes" class="text-center py-12 hidden-screen"><p class="text-slate-400">Nenhum cliente cadastrado.</p></div>
     </div>
 
-    <!-- ECRÃ VENDAS (CAIXA) -->
     <div id="screen-vendas" class="max-w-4xl mx-auto hidden-screen pt-4">
         <div class="h-40 bg-banner-financeiro bg-cover bg-center rounded-3xl mb-6 shadow-md relative overflow-hidden">
             <div class="absolute inset-0 bg-gradient-to-t from-brand-900/90 to-brand-900/20 flex flex-col justify-end p-6">
@@ -294,7 +280,6 @@
             <button type="button" onclick="window.$('box-export').classList.toggle('hidden-screen')" class="text-sm font-bold text-brand-600 hover:underline btn-only-admin"><i class="fas fa-file-export"></i> Exportar</button>
         </div>
         
-        <!-- Caixa de Exportação -->
         <div class="hidden-screen bg-slate-50 p-4 rounded-2xl border border-slate-200 mb-4 btn-only-admin" id="box-export">
             <div class="grid grid-cols-2 gap-3 mb-3">
                 <div>
@@ -315,7 +300,6 @@
         <div id="msg-vazia-vendas" class="text-center py-10 bg-white rounded-3xl border border-slate-100 shadow-sm hidden-screen"><p class="text-slate-400 font-serif">Nenhuma venda registrada.</p></div>
     </div>
 
-    <!-- ECRÃ DESPESAS -->
     <div id="screen-despesas" class="max-w-4xl mx-auto hidden-screen pt-4">
         <div class="h-40 bg-banner-despesas bg-cover bg-center rounded-3xl mb-6 shadow-md relative overflow-hidden">
             <div class="absolute inset-0 bg-gradient-to-t from-brand-900/90 to-brand-900/20 flex flex-col justify-end p-6">
@@ -372,7 +356,6 @@
         <div id="msg-vazia-perdas" class="text-center py-10 bg-white rounded-3xl border border-slate-100 shadow-sm hidden-screen"><p class="text-slate-400 font-serif">Nenhuma perda registrada este mês.</p></div>
     </div>
 
-    <!-- ECRÃ GRÁFICOS -->
     <div id="screen-graficos" class="max-w-4xl mx-auto hidden-screen pt-4">
         <div class="flex items-center justify-between mb-6 bg-white p-5 rounded-3xl shadow-sm border border-slate-100">
             <div><h1 class="text-3xl font-serif font-bold text-brand-900">Desempenho</h1><p class="text-sm text-slate-500">Métricas da sua confeitaria</p></div>
@@ -414,7 +397,6 @@
         </div>
     </div>
 
-    <!-- ECRÃ EQUIPE E CONFIGURAÇÕES (APENAS ADMIN) -->
     <div id="screen-equipe" class="max-w-4xl mx-auto hidden-screen pt-4">
         <div class="bg-brand-900 rounded-3xl p-6 mb-6 shadow-md text-white">
             <h1 class="text-3xl font-serif font-bold mb-1">Configurações & Equipe</h1>
@@ -469,9 +451,6 @@
 
     <div class="h-32 w-full pointer-events-none"></div>
 
-    <!-- MODAIS E COMPONENTES OCULTOS -->
-    
-    <!-- Modal Ações Caixa -->
     <div id="modal-acoes-caixa" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[200] flex items-center justify-center hidden-screen p-4">
         <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl">
             <div class="flex justify-between items-center mb-5">
@@ -507,7 +486,6 @@
         </div>
     </div>
     
-    <!-- Modal Adicionar Novo Usuário -->
     <div id="modal-novo-usuario" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[200] flex items-center justify-center hidden-screen p-4">
         <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl">
             <h3 class="text-xl font-serif font-bold text-brand-900 mb-4">Novo Usuário</h3>
@@ -530,7 +508,6 @@
         </div>
     </div>
     
-    <!-- Modal Opcoes / Gerir Usuario -->
     <div id="modal-opcoes-usuario" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[200] flex items-center justify-center hidden-screen p-4">
         <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl">
             <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-3">
@@ -538,12 +515,10 @@
                 <button type="button" onclick="window.hide('modal-opcoes-usuario')" class="w-8 h-8 bg-slate-100 text-slate-500 rounded-full hover:bg-slate-200 active:scale-95 flex items-center justify-center"><i class="fas fa-times"></i></button>
             </div>
             <div id="opcoes-user-content" class="flex flex-col gap-3">
-                <!-- Preenchido via JS -->
-            </div>
+                </div>
         </div>
     </div>
 
-    <!-- Modal Ficha Técnica -->
     <div id="modal-ficha-tecnica" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[200] flex items-center justify-center hidden-screen p-4 overflow-y-auto">
         <div class="bg-white rounded-3xl p-6 w-full max-w-lg shadow-2xl my-auto">
             <div class="flex justify-between items-center mb-6">
@@ -622,7 +597,6 @@
         </div>
     </div>
 
-    <!-- Modal Registrar Perda -->
     <div id="modal-perda" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[200] flex items-center justify-center hidden-screen p-4">
         <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl">
             <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-3">
@@ -648,7 +622,6 @@
         </div>
     </div>
 
-    <!-- Modal Carrinho Adicionar -->
     <div id="modal-add-carrinho" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[150] flex items-center justify-center hidden-screen p-4 transition-all">
         <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl flex flex-col">
             <div class="flex justify-between items-center mb-2">
@@ -672,7 +645,6 @@
         </div>
     </div>
 
-    <!-- Modais de Checkout e Carrinho -->
     <div id="modal-carrinho" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[150] flex items-end sm:items-center justify-center hidden-screen p-0 sm:p-4 transition-all">
         <div class="bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-md shadow-2xl h-[90vh] sm:h-auto flex flex-col">
             <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4 shrink-0">
@@ -698,7 +670,6 @@
         </div>
     </div>
 
-    <!-- MODAL CHECKOUT COMPLETO -->
     <div id="modal-checkout-pgto" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] flex items-center justify-center hidden-screen p-4">
         <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl flex flex-col max-h-[90vh]">
             <h3 class="text-2xl font-serif font-bold text-brand-900 mb-4 border-b pb-3 shrink-0">Pagamento</h3>
@@ -736,7 +707,6 @@
                     </div>
                 </div>
 
-                <!-- Dinheiro -->
                 <div id="box-troco" class="hidden-screen border-t border-slate-100 pt-3">
                     <div class="mb-3">
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Valor Recebido (R$)</label>
@@ -748,7 +718,6 @@
                     </div>
                 </div>
                 
-                <!-- Cartões -->
                 <div id="box-parcelas-cartao" class="hidden-screen border-t border-slate-100 pt-3">
                     <div class="grid grid-cols-2 gap-3 mb-3">
                         <div>
@@ -774,7 +743,6 @@
                     </div>
                 </div>
 
-                <!-- Carnê/Fiado -->
                 <div id="box-carne" class="hidden-screen border-t border-slate-100 pt-3">
                     <div class="mb-3">
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Cliente da Encomenda</label>
@@ -822,7 +790,6 @@
         </div>
     </div>
 
-    <!-- MODAL CONFIRMAÇÃO GENÉRICA -->
     <div id="modal-confirmacao" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[9999] flex items-center justify-center hidden-screen p-4">
         <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl">
             <div id="modal-confirm-icon" class="w-14 h-14 bg-red-100 text-red-500 rounded-full flex items-center justify-center text-2xl mx-auto mb-4"><i class="fas fa-exclamation-triangle"></i></div>
@@ -835,7 +802,6 @@
         </div>
     </div>
 
-    <!-- MODAL ALERTA PERECIVEIS -->
     <div id="modal-alerta-pereciveis" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[300] flex items-center justify-center hidden-screen p-4 overflow-y-auto custom-scrollbar">
         <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl my-auto flex flex-col max-h-[90vh]">
             <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-4 shrink-0">
@@ -850,7 +816,6 @@
         </div>
     </div>
     
-    <!-- MODAL OPCOES ESTORNO -->
     <div id="modal-opcoes-estorno" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[300] flex items-center justify-center hidden-screen p-4">
         <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-xl max-h-[90vh] flex flex-col">
             <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-3 shrink-0">
@@ -861,7 +826,6 @@
         </div>
     </div>
     
-    <!-- MODAL PREVIEW RELATORIO -->
     <div id="modal-preview-relatorio" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[300] flex items-center justify-center hidden-screen p-4">
         <div class="bg-white rounded-3xl p-6 w-full max-w-4xl shadow-2xl h-[90vh] flex flex-col">
             <div class="flex justify-between items-center mb-2 shrink-0">
@@ -901,7 +865,6 @@
         </div>
     </div>
     
-    <!-- MODAL GERENCIAR PARCELAS -->
     <div id="modal-gerenciar-parcelas" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[200] flex items-center justify-center hidden-screen p-4 overflow-y-auto">
         <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl my-auto flex flex-col max-h-[90vh]">
             <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-4 shrink-0">
@@ -914,7 +877,6 @@
         </div>
     </div>
     
-    <!-- MODAL NOVO CLIENTE -->
     <div id="modal-cliente" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] flex items-center justify-center hidden-screen p-4 overflow-y-auto custom-scrollbar">
         <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl my-auto">
             <h3 class="text-xl font-serif font-bold text-brand-900 mb-4">Novo Cliente</h3>
@@ -934,7 +896,6 @@
         </div>
     </div>
     
-    <!-- MODAL RESUMO ESTOQUE -->
     <div id="modal-resumo-estoque" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] flex items-center justify-center hidden-screen p-4">
         <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl flex flex-col max-h-[90vh]">
             <div class="flex justify-between items-center mb-4 shrink-0">
@@ -963,19 +924,20 @@
             
             <h4 class="font-bold text-slate-700 text-sm mb-2 shrink-0 border-t border-slate-100 pt-4">Lista de Produtos em Estoque</h4>
             <div id="lista-resumo-produtos" class="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-2 mb-4 bg-slate-50 p-2 rounded-xl border border-slate-100">
-                <!-- Javascript will inject items here -->
-            </div>
+                </div>
 
             <div class="flex gap-2 shrink-0">
-                <button type="button" onclick="window.hide('modal-resumo-estoque')" class="flex-1 bg-slate-100 text-slate-700 font-bold py-3 rounded-xl active:scale-95">Fechar</button>
-                <button type="button" onclick="window.exportarResumoEstoque()" class="flex-1 bg-brand-600 text-white font-bold py-3 rounded-xl shadow-lg active:scale-95 flex items-center justify-center gap-2">
-                    <i class="fas fa-file-export"></i> Exportar CSV
+                <button type="button" onclick="window.hide('modal-resumo-estoque')" class="flex-[0.8] bg-slate-100 text-slate-700 font-bold py-3 rounded-xl active:scale-95">Fechar</button>
+                <button type="button" onclick="window.enviarResumoEstoqueWhatsapp()" class="flex-1 bg-green-500 text-white font-bold py-3 rounded-xl shadow-lg active:scale-95 flex items-center justify-center gap-1 text-[11px] sm:text-xs">
+                    <i class="fab fa-whatsapp text-lg"></i> WhatsApp
+                </button>
+                <button type="button" onclick="window.exportarResumoEstoque()" class="flex-1 bg-brand-600 text-white font-bold py-3 rounded-xl shadow-lg active:scale-95 flex items-center justify-center gap-1 text-[11px] sm:text-xs">
+                    <i class="fas fa-file-export text-lg"></i> CSV
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Modal Nova Categoria -->
     <div id="modal-nova-categoria" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] flex items-center justify-center hidden-screen p-4">
         <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl">
             <h3 class="text-xl font-serif font-bold text-brand-900 mb-4">Nova Categoria</h3>
@@ -999,7 +961,6 @@
         </div>
     </div>
 
-    <!-- NAVEGAÇÃO INFERIOR -->
     <nav id="nav-inferior" class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] z-30 pb-safe hidden-screen">
         <div class="max-w-4xl mx-auto flex justify-between p-1 overflow-x-auto no-scrollbar gap-1 px-2">
             <button type="button" onclick="window.navegarApp('estoque')" id="tab-estoque" class="flex-1 flex flex-col items-center p-2 text-slate-400 min-w-[55px] tab-active transition-all"><i class="fas fa-store text-lg mb-1"></i><span class="text-[8px] font-bold mt-1 uppercase">Vitrine</span></button>
@@ -1016,7 +977,6 @@
         </div>
     </nav>
 
-    <!-- MÓDULO FIREBASE E COMUNICAÇÃO CLOUD -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, doc, getDoc, setDoc, collection, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -1214,7 +1174,6 @@
 
     </script>
 
-    <!-- SCRIPT DE FUNCIONALIDADES E LÓGICA DO NEGÓCIO -->
     <script>
         window.currentUser = null;
         window.adminAssumindo = null;
@@ -1787,6 +1746,30 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+        };
+
+        window.enviarResumoEstoqueWhatsapp = function() {
+            const { totalValorEstoque } = window.analisarEstoqueInteligente(); 
+            let totalPecas = window.dbProdutos.reduce((a, b) => a + (parseInt(b.estoque) || 0), 0); 
+            let custoTotal = window.dbProdutos.reduce((a, b) => a + ((window.calcularPricing(b).custoTotal) * (parseInt(b.estoque) || 0)), 0); 
+            let lucroProjetado = totalValorEstoque - custoTotal;
+            
+            let texto = "📦 *RESUMO GERAL DE ESTOQUE*\n\n";
+            texto += `*Total de Itens:* ${totalPecas}\n`;
+            texto += `*Custo Investido:* ${window.fmtMoeda(custoTotal)}\n`;
+            texto += `*Valor Total Venda:* ${window.fmtMoeda(totalValorEstoque)}\n`;
+            texto += `*Lucro Projetado:* ${window.fmtMoeda(lucroProjetado)}\n\n`;
+            
+            texto += "📋 *Produtos em Estoque:*\n";
+            
+            const prodEmEstoque = window.dbProdutos.filter(p => !p.isDraft && parseInt(p.estoque) > 0);
+            prodEmEstoque.sort((a,b) => parseInt(b.estoque) - parseInt(a.estoque)).forEach(p => {
+                const pricing = window.calcularPricing(p);
+                const qtd = parseInt(p.estoque);
+                texto += `- ${qtd}x ${p.nome} (Subtotal: ${window.fmtMoeda(pricing.precoFinal * qtd)})\n`;
+            });
+
+            window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
         };
 
         window.renderCategorias = function() {
@@ -3111,7 +3094,6 @@
 
     </script>
 
-    <!-- ÚNICO BLOCO DO SERVICE WORKER -->
     <script>
         if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
             window.addEventListener('load', () => {
