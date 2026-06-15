@@ -1,18 +1,19 @@
-const CACHE_NAME = 'confeitaria-v2';
+const CACHE_NAME = 'confeitaria-v4';
 const ASSETS = [
     './',
     './index.html',
-    './manifest.json'
+    './manifest.json',
+    './logo-192.png',
+    './logo-512.png'
 ];
 
 // Instalação do Service Worker
 self.addEventListener('install', (e) => {
-    self.skipWaiting(); // Força a atualização imediata
+    self.skipWaiting();
     e.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
-            // Tenta adicionar os assets ao cache de forma resiliente
             return Promise.allSettled(
-                ASSETS.map(asset => cache.add(asset).catch(err => console.warn('Cache ignorado para:', asset)))
+                ASSETS.map(asset => cache.add(asset).catch(err => console.warn('Erro ao cachear:', asset)))
             );
         })
     );
@@ -20,27 +21,36 @@ self.addEventListener('install', (e) => {
 
 // Ativação e limpeza de caches antigos
 self.addEventListener('activate', (e) => {
-    e.waitUntil(self.clients.claim());
+    e.waitUntil(
+        caches.keys().then((keys) => {
+            return Promise.all(
+                keys.map((key) => {
+                    if (key !== CACHE_NAME) {
+                        return caches.delete(key);
+                    }
+                })
+            );
+        }).then(() => self.clients.claim())
+    );
 });
 
 // Interceptação de requisições (Fetch)
 self.addEventListener('fetch', (e) => {
-    // 1. IGNORAR protocolos não suportados (blob: do VS Code Live Preview, chrome-extension:, etc)
-    if (!e.request.url.startsWith('http')) {
-        return;
-    }
+    if (!e.request.url.startsWith('http')) return;
+    if (e.request.url.includes('firestore.googleapis.com') || e.request.url.includes('vscode-livepreview')) return;
 
-    // 2. IGNORAR requisições do Firebase (para não travar a base de dados) e do VS Code Live Reload
-    if (e.request.url.includes('firestore.googleapis.com') || 
-        e.request.url.includes('vscode-livepreview')) {
-        return;
-    }
-
-    // 3. ESTRATÉGIA OFFLINE: Retorna do cache se existir, senão busca da internet
     e.respondWith(
-        caches.match(e.request).then((res) => {
-            return res || fetch(e.request).catch((err) => {
-                console.warn('Tentativa de acesso offline falhou:', e.request.url);
+        caches.match(e.request).then((cachedResponse) => {
+            if (cachedResponse) {
+                return cachedResponse;
+            }
+
+            return fetch(e.request).catch((err) => {
+                console.warn('Modo offline ativo para:', e.request.url);
+                // Se a navegação falhar offline, força a abertura do index.html do cache
+                if (e.request.mode === 'navigate') {
+                    return caches.match('./index.html');
+                }
             });
         })
     );
