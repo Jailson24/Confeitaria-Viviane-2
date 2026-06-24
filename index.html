@@ -808,7 +808,7 @@
                 <h3 class="text-xl font-serif font-bold text-red-600 flex items-center gap-2"><i class="fas fa-exclamation-triangle"></i> Alerta de Validade!</h3>
                 <button type="button" onclick="window.hide('modal-alerta-pereciveis')" class="w-8 h-8 bg-slate-100 text-slate-500 rounded-full hover:bg-slate-200 active:scale-95 flex items-center justify-center"><i class="fas fa-times"></i></button>
             </div>
-            <p class="text-sm text-slate-600 mb-4 shrink-0">Como trabalha com alimentos perecíveis, separamos os itens que estão parados na vitrine há <strong>mais de 48 horas</strong>. Verifique a qualidade ou faça uma promoção rápida para não perder os ingredientes!</p>
+            <p class="text-sm text-slate-600 mb-4 shrink-0">Como trabalha com produtos, separamos os itens que estão parados na vitrine há <strong>mais de 15 dias</strong>. Verifique ou faça uma promoção rápida para não perder dinheiro!</p>
             <div class="overflow-y-auto custom-scrollbar flex-1 pr-2" id="lista-modal-pereciveis"></div>
             <div class="mt-4 pt-4 border-t border-slate-100 shrink-0">
                 <button type="button" onclick="window.hide('modal-alerta-pereciveis')" class="w-full bg-slate-100 text-slate-700 font-bold py-3 rounded-xl active:scale-95">Entendido</button>
@@ -1003,11 +1003,14 @@
             catch(e) { console.error("Erro ao salvar na nuvem:", e); }
         };
 
+        // ALTERAÇÃO 1: Throw error se houver falha de rede
         window.cloudLoad = async () => {
             try {
                 const snap = await getDoc(doc(db, "sistema", "dados_loja"));
                 return snap.exists() ? snap.data() : null;
-            } catch(e) { return null; }
+            } catch(e) { 
+                throw new Error("network_failed"); 
+            }
         };
 
         // Registra a última atividade do utilizador para controlo de presença
@@ -1207,8 +1210,6 @@
         window.compraAtualEstorno = null;
         window.currentCat = '';
 
-        const getLocalKey = () => 'confeitaria_data_livre';
-
         window.aplicarPermissoes = function(role) {
             const items = document.querySelectorAll('.btn-only-admin');
             items.forEach(el => {
@@ -1254,8 +1255,12 @@
             if(!u) return;
 
             if(window.cloudLoad) {
-                const cloudData = await window.cloudLoad();
-                if(cloudData && cloudData.caixasAbertos) window.dbCaixasAbertos = cloudData.caixasAbertos;
+                try {
+                    const cloudData = await window.cloudLoad();
+                    if(cloudData && cloudData.caixasAbertos) window.dbCaixasAbertos = cloudData.caixasAbertos;
+                } catch(e) {
+                    // ignora erro de rede ao tentar assumir
+                }
             }
 
             window.adminAssumindo = u;
@@ -1432,14 +1437,21 @@
             if (alterado) window.saveDB();
         };
 
+        // ALTERAÇÃO 2: Bloqueio do Início caso não haja conexão e Remoção definitiva do localStorage
         window.carregarDadosIniciais = async function() {
             try {
-                window.dbProdutos = []; window.dbCategorias = []; window.dbClientes = []; window.dbVendas = [];
-                window.dbParcelas = []; window.dbDespesas = []; window.dbReceitas = []; window.carrinho = [];
-                window.dbHistoricoCaixa = []; window.dbCaixasAbertos = []; window.dbPerdas = [];
-
                 let cloudData = null;
-                if(window.cloudLoad) cloudData = await window.cloudLoad();
+                
+                if(window.cloudLoad) {
+                    try {
+                        cloudData = await window.cloudLoad();
+                    } catch (e) {
+                        if (e.message === "network_failed") {
+                            alert("⚠️ FALHA DE CONEXÃO: Você está sem internet ou o sinal está muito fraco. O sistema não carregará para proteger e evitar que seus dados da nuvem sejam apagados.");
+                            return; // A TRAVA DE SEGURANÇA QUE ABORTA TUDO SE NÃO TIVER NET
+                        }
+                    }
+                }
 
                 if(cloudData && Object.keys(cloudData).length > 0) {
                     window.dbProdutos = cloudData.produtos || [];
@@ -1455,47 +1467,23 @@
                     
                     if(cloudData.caixaAberto) {
                         window.dbCaixasAbertos.push(cloudData.caixaAberto);
-                        delete cloudData.caixaAberto;
                     }
                     
                     window.configSistema = cloudData.configs || { linkWhatsAppGroup: '', modoSeguranca: false };
                     document.getElementById('config-link-wpp').value = window.configSistema.linkWhatsAppGroup || '';
                     if(document.getElementById('toggle-seguranca')) document.getElementById('toggle-seguranca').checked = window.configSistema.modoSeguranca;
 
-                    localStorage.setItem(getLocalKey(), JSON.stringify(cloudData));
                 } else {
-                    const dadosStr = localStorage.getItem(getLocalKey());
-                    if(dadosStr) {
-                        const dados = JSON.parse(dadosStr);
-                        window.dbProdutos = dados.produtos || [];
-                        window.dbClientes = dados.clientes || [];
-                        window.dbVendas = dados.vendas || [];
-                        window.dbParcelas = dados.parcelas || [];
-                        window.dbReceitas = dados.receitas || [];
-                        window.dbDespesas = dados.despesas || [];
-                        window.dbCategorias = dados.categorias || [];
-                        window.dbCaixasAbertos = dados.caixasAbertos || [];
-                        window.dbHistoricoCaixa = dados.historicoCaixa || [];
-                        window.dbPerdas = dados.perdas || [];
-
-                        if(dados.caixaAberto) {
-                            window.dbCaixasAbertos.push(dados.caixaAberto);
-                        }
-
-                        window.configSistema = dados.configs || { linkWhatsAppGroup: '', modoSeguranca: false };
-                        
-                        document.getElementById('config-link-wpp').value = window.configSistema.linkWhatsAppGroup || '';
-                        if(document.getElementById('toggle-seguranca')) document.getElementById('toggle-seguranca').checked = window.configSistema.modoSeguranca;
-                    }
-                }
-                
-                if (window.dbCategorias.length === 0) {
+                    // Sem dados na nuvem e internet funcionou -> Primeiro acesso real.
+                    window.dbProdutos = []; window.dbClientes = []; window.dbVendas = [];
+                    window.dbParcelas = []; window.dbDespesas = []; window.dbReceitas = []; window.carrinho = [];
+                    window.dbHistoricoCaixa = []; window.dbCaixasAbertos = []; window.dbPerdas = [];
                     window.dbCategorias = [
                         { id: 'bolos', nome: 'Bolos', icone: 'fa-birthday-cake' }, { id: 'doces', nome: 'Doces Finos', icone: 'fa-cookie' },
                         { id: 'tortas', nome: 'Tortas', icone: 'fa-chart-pie' }, { id: 'salgados', nome: 'Salgados', icone: 'fa-pizza-slice' },
                         { id: 'bebidas', nome: 'Bebidas', icone: 'fa-coffee' }, { id: 'embalagens', nome: 'Embalagens', icone: 'fa-box-open' }
                     ];
-                    window.saveDB();
+                    window.saveDB(); // Apenas o primeiro acesso inicializa na nuvem
                 }
                 
                 window.processarBaixasAutomaticas(); 
@@ -1506,6 +1494,7 @@
             } catch(e) { console.error("Erro no carregamento:", e); window.renderCategorias(); }
         };
 
+        // ALTERAÇÃO 3: Limpeza completa do localStorage. Onde é Salvo, só salva na nuvem.
         window.saveDB = function() {
             try {
                 const dados = { 
@@ -1515,9 +1504,8 @@
                     caixasAbertos: window.dbCaixasAbertos, historicoCaixa: window.dbHistoricoCaixa,
                     perdas: window.dbPerdas
                 };
-                localStorage.setItem(getLocalKey(), JSON.stringify(dados));
                 if(window.cloudSave) window.cloudSave(dados);
-            } catch(e) { console.warn("Aviso: Falha ao guardar no armazenamento local.", e); }
+            } catch(e) { console.warn("Erro ao enviar dados para a nuvem.", e); }
         };
 
         window.baixarBackupJSON = function() {
@@ -1610,9 +1598,9 @@
             return { totalValorEstoque };
         };
 
+        // ALTERAÇÃO 4: Alerta de perecíveis/estoque parado agora em 15 dias (360h) e não mais 48h
         window.verificarItensPereciveis = function(autoShow = false) {
             const hoje = new Date();
-            const limiteHoras = 48 * 60 * 60 * 1000;
             let itensAlerta = [];
 
             window.dbProdutos.forEach(p => {
@@ -1625,8 +1613,10 @@
                         ultimaVendaStr = vendasOrdenadas[0].data;
                     }
                     let dataRef = ultimaVendaStr ? new Date(ultimaVendaStr) : new Date(p.dataCadastro || 0);
-                    let horasParado = (hoje - dataRef) / (60 * 60 * 1000);
-                    if (horasParado > 48) { itensAlerta.push({ ...p, horasParado: Math.floor(horasParado) }); }
+                    let diasParado = (hoje - dataRef) / (24 * 60 * 60 * 1000); // Converte para dias
+                    if (diasParado > 15) { 
+                        itensAlerta.push({ ...p, diasParado: Math.floor(diasParado) }); 
+                    }
                 }
             });
 
@@ -1636,7 +1626,7 @@
                     <div class="bg-red-50 p-3 rounded-xl border border-red-100 flex justify-between items-center mb-2 shadow-sm">
                         <div>
                             <p class="font-bold text-sm text-slate-800">${p.nome.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>
-                            <p class="text-[10px] text-red-600 font-bold uppercase tracking-wider"><i class="fas fa-skull-crossbones mr-1"></i> Parado há ${p.horasParado}h</p>
+                            <p class="text-[10px] text-red-600 font-bold uppercase tracking-wider"><i class="fas fa-skull-crossbones mr-1"></i> Parado há ${p.diasParado} dias</p>
                         </div>
                         <div class="text-center bg-white px-3 py-1 rounded-lg border border-red-100">
                             <span class="block text-[9px] font-bold text-slate-400 uppercase tracking-widest">Qtd. Restante</span>
@@ -1857,7 +1847,7 @@
             }
 
             const hoje = new Date();
-            const limiteHoras = 48 * 60 * 60 * 1000;
+            const limiteMilissegundos = 15 * 24 * 60 * 60 * 1000; // Alterado para 15 dias
 
             filtered.slice().reverse().forEach(p => {
                 const pricing = window.calcularPricing(p);
@@ -1871,7 +1861,9 @@
                     ultimaVendaStr = vendasOrdenadas[0].data;
                 }
                 let dataRef = ultimaVendaStr ? new Date(ultimaVendaStr) : new Date(p.dataCadastro || 0);
-                let isPerecendo = (hoje - dataRef > limiteHoras) && (parseInt(p.estoque) > 0) && !p.isDraft;
+                
+                // Validação se está parado além dos 15 dias
+                let isPerecendo = (hoje - dataRef > limiteMilissegundos) && (parseInt(p.estoque) > 0) && !p.isDraft;
 
                 const isLowStock = parseInt(p.estoque) <= 3 && !p.isDraft;
 
@@ -1928,7 +1920,7 @@
                         <div class="w-full">
                             <span class="text-[10px] font-bold text-slate-400 uppercase flex items-center mb-1 tracking-widest">
                                 ${p.isDraft ? '<span class="text-accent-500 mr-2">[NOVO - PREENCHA]</span>' : 'Produto'}
-                                ${isPerecendo ? '<span class="text-red-500 ml-2 animate-pulse font-black" title="Parado há mais de 48h!"><i class="fas fa-skull-crossbones"></i> Validade Próxima?</span>' : (isLowStock ? '<span class="text-orange-500 ml-2 font-black"><i class="fas fa-exclamation-circle"></i> Estoque Baixo</span>' : '')}
+                                ${isPerecendo ? '<span class="text-red-500 ml-2 animate-pulse font-black" title="Parado há mais de 15 dias!"><i class="fas fa-skull-crossbones"></i> Validade Próxima?</span>' : (isLowStock ? '<span class="text-orange-500 ml-2 font-black"><i class="fas fa-exclamation-circle"></i> Estoque Baixo</span>' : '')}
                             </span>
                             <input type="text" value="${safeName}" onchange="window.updateProd('${p.id}', 'nome', this.value)" class="w-full bg-transparent font-serif font-bold text-xl text-brand-900 border-none p-0 outline-none" placeholder="Ex: Bolo Red Velvet Inteiro" ${isReadOnly}>
                         </div>
@@ -2289,7 +2281,7 @@
                     </div>
                     ${c.tel ? `
                     <div class="flex gap-2 mt-3">
-                        <button type="button" onclick="window.abrirWhatsappDireto('${c.tel}')" class="flex-1 bg-green-500 text-white px-3 py-2 rounded-xl text-xs font-bold flex justify-center items-center gap-1 active:scale-95 shadow-sm transition hover:bg-green-600"><i class="fab fa-whatsapp text-lg"></i> Conversar</button>
+                        <button type="button" onclick="window.abrirWhatsappDireto('${c.tel}')" class="flex-1 bg-green-50 text-white px-3 py-2 rounded-xl text-xs font-bold flex justify-center items-center gap-1 active:scale-95 shadow-sm transition hover:bg-green-600"><i class="fab fa-whatsapp text-lg"></i> Conversar</button>
                         <button type="button" onclick="window.enviarConviteGrupoWpp('${c.tel}')" class="flex-1 bg-green-50 text-green-700 px-3 py-2 rounded-xl text-xs font-bold flex justify-center items-center gap-1 active:scale-95 border border-green-200 transition hover:bg-green-100" title="Enviar Link VIP"><i class="fas fa-link"></i> Link VIP</button>
                         <button type="button" onclick="window.copiarNumero('${c.tel}')" class="bg-slate-100 text-slate-600 px-4 py-2 rounded-xl text-xs font-bold flex justify-center items-center gap-1 active:scale-95 border border-slate-200 transition hover:bg-slate-200" title="Copiar Número"><i class="fas fa-copy text-sm"></i></button>
                     </div>` : ''}
